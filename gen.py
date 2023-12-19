@@ -2,77 +2,24 @@ import textwrap
 
 import cairo
 import numpy
-import PIL.Image
 
-def generate_images():
-	width = 618
-	height = 1000
+u8 =  lambda arr: numpy.rint(arr * 255).astype(numpy.uint8)
+u16 = lambda arr: numpy.rint(arr * 65535).astype(numpy.uint16)
+rgb = lambda arr: arr[:, :, 0:3]
+a =   lambda arr: arr[:, :, -1]
+g =   lambda arr: numpy.average(rgb(arr), axis=2)
+ga =  lambda arr: numpy.concatenate((g(arr).reshape(arr.shape[0], arr.shape[1], 1), a(arr).reshape(arr.shape[0], arr.shape[1], 1)), axis=2)
 
-	u8 =  lambda arr: numpy.rint(arr * 255).astype(numpy.uint8)
-	u16 = lambda arr: numpy.rint(arr * 65535).astype(numpy.uint16)
-	rgb = lambda arr: arr[:, :, 0:3]
-	a =   lambda arr: arr[:, :, -1]
-	g =   lambda arr: numpy.average(rgb(arr), axis=2)
-	ga =  lambda arr: numpy.concatenate((g(arr).reshape(arr.shape[0], arr.shape[1], 1), a(arr).reshape(arr.shape[0], arr.shape[1], 1)), axis=2)
-
-	formats = {
-		'RGBA16': lambda arr: u16(arr),
-		'RGB16':  lambda arr: u16(rgb(arr)),
-		'GA16':   lambda arr: u16(ga(arr)),
-		'G16':    lambda arr: u16(g(arr)),
-		'RGBA8':  lambda arr: u8(arr),
-		'RGB8':   lambda arr: u8(rgb(arr)),
-		'GA8':    lambda arr: u8(ga(arr)),
-		'G8':     lambda arr: u8(g(arr)),
-	}
-
-	def gen_img(format, ftype, ext=None):
-		label = f'{ftype} {format}'
-		print(f'{label}...')
-		if ext is None: ext = ftype.lower()
-		fn = f'test_{ftype.lower()}_{format.lower()}.{ext}'
-		arr = generate_test_image(width, height, label)
-		PIL.Image.fromarray(formats[format](arr)).save(fn)
-
-	def gen_raw(format, conv, dtype=None):
-		print(f"RAW {format}...")
-		numpy.ascontiguousarray(
-			conv(generate_test_image(width, height, f'RAW {format}')),
-			dtype=dtype,
-		).tofile(f'test_raw_{width}x{height}_{format}.raw')
-
-#	gen_img('RGBA16', 'PNG')
-#	gen_img('RGB16',  'PNG')
-#	gen_img('GA16',   'PNG')
-#	gen_img('G16',    'PNG')
-	gen_img('RGBA8',  'PNG')
-	gen_img('RGB8',   'PNG')
-	gen_img('GA8',    'PNG')
-	gen_img('G8',     'PNG')
-
-	gen_img('RGBA8',  'BMP')
-	gen_img('RGB8',   'BMP')
-	gen_img('G8',     'BMP')
-
-#	gen_img('RGBA16', 'TIFF', ext='tif')
-#	gen_img('RGB16',  'TIFF', ext='tif')
-#	gen_img('GA16',   'TIFF', ext='tif')
-	gen_img('G16',    'TIFF', ext='tif')
-	gen_img('RGBA8',  'TIFF', ext='tif')
-	gen_img('RGB8',   'TIFF', ext='tif')
-	gen_img('GA8',    'TIFF', ext='tif')
-	gen_img('G8',     'TIFF', ext='tif')
-
-	gen_img('RGB8',   'JPEG', ext='jpg')
-	gen_img('G8',     'JPEG', ext='jpg')
-
-	gen_raw('rgbau16le', formats['RGBA16'], '<u2')
-	gen_raw('rgbu16le', formats['RGB16'], '<u2')
-	gen_raw('gu16le', formats['G16'], '<u2')
-
-	gen_raw('rgbau8', formats['RGBA8'])
-	gen_raw('rgbu8', formats['RGB8'])
-	gen_raw('gu8', formats['G8'])
+formats = {
+	'RGBA16': lambda arr: u16(arr),
+	'RGB16':  lambda arr: u16(rgb(arr)),
+	'GA16':   lambda arr: u16(ga(arr)),
+	'G16':    lambda arr: u16(g(arr)),
+	'RGBA8':  lambda arr: u8(arr),
+	'RGB8':   lambda arr: u8(rgb(arr)),
+	'GA8':    lambda arr: u8(ga(arr)),
+	'G8':     lambda arr: u8(g(arr)),
+}
 
 def generate_test_image(width, height, format):
 	with cairo.ImageSurface(cairo.Format.RGBA128F, width, height) as surface:
@@ -236,9 +183,3 @@ def gradient(dir, p1, p2, c1, c2, ctx):
 	ctx.fill()
 
 	ctx.restore()
-
-def main():
-	generate_images()
-
-if __name__ == '__main__':
-	main()

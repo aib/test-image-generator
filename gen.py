@@ -1,11 +1,67 @@
 import textwrap
 
 import cairo
+import numpy
+import PIL.Image
 
-def generate_test_image():
+def generate_images():
 	width = 618
 	height = 1000
-	with cairo.ImageSurface(cairo.Format.ARGB32, width, height) as surface:
+
+	u8 =  lambda arr: numpy.rint(arr * 255).astype(numpy.uint8)
+	u16 = lambda arr: numpy.rint(arr * 65535).astype(numpy.uint16)
+	rgb = lambda arr: arr[:, :, 0:3]
+	a =   lambda arr: arr[:, :, -1]
+	g =   lambda arr: numpy.average(rgb(arr), axis=2)
+	ga =  lambda arr: numpy.concatenate((g(arr).reshape(arr.shape[0], arr.shape[1], 1), a(arr).reshape(arr.shape[0], arr.shape[1], 1)), axis=2)
+
+	formats = {
+		'RGBA16': lambda arr: u16(arr),
+		'RGB16':  lambda arr: u16(rgb(arr)),
+		'GA16':   lambda arr: u16(ga(arr)),
+		'G16':    lambda arr: u16(g(arr)),
+		'RGBA8':  lambda arr: u8(arr),
+		'RGB8':   lambda arr: u8(rgb(arr)),
+		'GA8':    lambda arr: u8(ga(arr)),
+		'G8':     lambda arr: u8(g(arr)),
+	}
+
+	def gen1(format, ftype, ext=None):
+		label = f'{ftype} {format}'
+		print(f'{label}...')
+		if ext is None: ext = ftype.lower()
+		fn = f'test_{ftype.lower()}_{format.lower()}.{ext}'
+		arr = generate_test_image(width, height, label)
+		PIL.Image.fromarray(formats[format](arr)).save(fn)
+		print(fn)
+
+#	gen1('RGBA16', 'PNG')
+#	gen1('RGB16',  'PNG')
+#	gen1('GA16',   'PNG')
+#	gen1('G16',    'PNG')
+	gen1('RGBA8',  'PNG')
+	gen1('RGB8',   'PNG')
+	gen1('GA8',    'PNG')
+	gen1('G8',     'PNG')
+
+	gen1('RGBA8',  'BMP')
+	gen1('RGB8',   'BMP')
+	gen1('G8',     'BMP')
+
+#	gen1('RGBA16', 'TIFF', ext='tif')
+#	gen1('RGB16',  'TIFF', ext='tif')
+#	gen1('GA16',   'TIFF', ext='tif')
+	gen1('G16',    'TIFF', ext='tif')
+	gen1('RGBA8',  'TIFF', ext='tif')
+	gen1('RGB8',   'TIFF', ext='tif')
+	gen1('GA8',    'TIFF', ext='tif')
+	gen1('G8',     'TIFF', ext='tif')
+
+	gen1('RGB8',   'JPEG', ext='jpg')
+	gen1('G8',     'JPEG', ext='jpg')
+
+def generate_test_image(width, height, format):
+	with cairo.ImageSurface(cairo.Format.RGBA128F, width, height) as surface:
 		ctx = cairo.Context(surface)
 
 		ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0)
@@ -17,12 +73,12 @@ def generate_test_image():
 		gh = generate_gradients(16, width - 16, height // 2, ctx)
 
 		upper_area = (16, 16, width - 32, height // 2 - gh - 32)
-		generate_text(upper_area, False, "PNG rgbau8", ctx)
+		generate_text(upper_area, False, format, ctx)
 
 		lower_area = (16, height // 2 + gh + 16, width - 32, height // 2 - gh - 32)
-		generate_text(lower_area, True, "PNG rgbau8", ctx)
+		generate_text(lower_area, True, format, ctx)
 
-		surface.write_to_png('test_png_rgbau8.png')
+		return numpy.array(surface.get_data().cast('f'), dtype=numpy.float32).reshape(height, width, 4)
 
 def generate_text(area, flip, format, ctx):
 	padding = 32
@@ -168,7 +224,7 @@ def gradient(dir, p1, p2, c1, c2, ctx):
 	ctx.restore()
 
 def main():
-	generate_test_image()
+	generate_images()
 
 if __name__ == '__main__':
 	main()

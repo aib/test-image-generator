@@ -33,7 +33,13 @@ def generate_images():
 		fn = f'test_{ftype.lower()}_{format.lower()}.{ext}'
 		arr = generate_test_image(width, height, label)
 		PIL.Image.fromarray(formats[format](arr)).save(fn)
-		print(fn)
+
+	def gen_raw(format, conv, dtype=None):
+		print(f"RAW {format}...")
+		numpy.ascontiguousarray(
+			conv(generate_test_image(width, height, f'RAW {format}')),
+			dtype=dtype,
+		).tofile(f'test_raw_{width}x{height}_{format}.raw')
 
 #	gen1('RGBA16', 'PNG')
 #	gen1('RGB16',  'PNG')
@@ -59,6 +65,14 @@ def generate_images():
 
 	gen1('RGB8',   'JPEG', ext='jpg')
 	gen1('G8',     'JPEG', ext='jpg')
+
+	gen_raw('rgbau16le', formats['RGBA16'], '<u2')
+	gen_raw('rgbu16le', formats['RGB16'], '<u2')
+	gen_raw('gu16le', formats['G16'], '<u2')
+
+	gen_raw('rgbau8', formats['RGBA8'])
+	gen_raw('rgbu8', formats['RGB8'])
+	gen_raw('gu8', formats['G8'])
 
 def generate_test_image(width, height, format):
 	with cairo.ImageSurface(cairo.Format.RGBA128F, width, height) as surface:

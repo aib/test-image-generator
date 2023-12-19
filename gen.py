@@ -26,7 +26,7 @@ def generate_images():
 		'G8':     lambda arr: u8(g(arr)),
 	}
 
-	def gen1(format, ftype, ext=None):
+	def gen_img(format, ftype, ext=None):
 		label = f'{ftype} {format}'
 		print(f'{label}...')
 		if ext is None: ext = ftype.lower()
@@ -41,30 +41,30 @@ def generate_images():
 			dtype=dtype,
 		).tofile(f'test_raw_{width}x{height}_{format}.raw')
 
-#	gen1('RGBA16', 'PNG')
-#	gen1('RGB16',  'PNG')
-#	gen1('GA16',   'PNG')
-#	gen1('G16',    'PNG')
-	gen1('RGBA8',  'PNG')
-	gen1('RGB8',   'PNG')
-	gen1('GA8',    'PNG')
-	gen1('G8',     'PNG')
+#	gen_img('RGBA16', 'PNG')
+#	gen_img('RGB16',  'PNG')
+#	gen_img('GA16',   'PNG')
+#	gen_img('G16',    'PNG')
+	gen_img('RGBA8',  'PNG')
+	gen_img('RGB8',   'PNG')
+	gen_img('GA8',    'PNG')
+	gen_img('G8',     'PNG')
 
-	gen1('RGBA8',  'BMP')
-	gen1('RGB8',   'BMP')
-	gen1('G8',     'BMP')
+	gen_img('RGBA8',  'BMP')
+	gen_img('RGB8',   'BMP')
+	gen_img('G8',     'BMP')
 
-#	gen1('RGBA16', 'TIFF', ext='tif')
-#	gen1('RGB16',  'TIFF', ext='tif')
-#	gen1('GA16',   'TIFF', ext='tif')
-	gen1('G16',    'TIFF', ext='tif')
-	gen1('RGBA8',  'TIFF', ext='tif')
-	gen1('RGB8',   'TIFF', ext='tif')
-	gen1('GA8',    'TIFF', ext='tif')
-	gen1('G8',     'TIFF', ext='tif')
+#	gen_img('RGBA16', 'TIFF', ext='tif')
+#	gen_img('RGB16',  'TIFF', ext='tif')
+#	gen_img('GA16',   'TIFF', ext='tif')
+	gen_img('G16',    'TIFF', ext='tif')
+	gen_img('RGBA8',  'TIFF', ext='tif')
+	gen_img('RGB8',   'TIFF', ext='tif')
+	gen_img('GA8',    'TIFF', ext='tif')
+	gen_img('G8',     'TIFF', ext='tif')
 
-	gen1('RGB8',   'JPEG', ext='jpg')
-	gen1('G8',     'JPEG', ext='jpg')
+	gen_img('RGB8',   'JPEG', ext='jpg')
+	gen_img('G8',     'JPEG', ext='jpg')
 
 	gen_raw('rgbau16le', formats['RGBA16'], '<u2')
 	gen_raw('rgbu16le', formats['RGB16'], '<u2')

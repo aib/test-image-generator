@@ -1,6 +1,8 @@
+import io
 import textwrap
 
 import cairo
+import cv2
 import numpy
 
 u8 =  lambda arr: numpy.rint(arr * 255).astype(numpy.uint8)
@@ -39,7 +41,12 @@ def generate_test_image(width, height, format):
 		lower_area = (16, height // 2 + gh + 16, width - 32, height // 2 - gh - 32)
 		generate_text(lower_area, True, format, ctx)
 
-		return numpy.array(surface.get_data().cast('f'), dtype=numpy.float32).reshape(height, width, 4)
+		bio = io.BytesIO()
+		surface.write_to_png(bio)
+		npbuf = numpy.frombuffer(bio.getbuffer(), numpy.uint8)
+		arr = cv2.imdecode(npbuf, cv2.IMREAD_UNCHANGED)
+
+		return numpy.array(arr.astype(numpy.float64) / 65535.0)
 
 def generate_text(area, flip, format, ctx):
 	padding = 32

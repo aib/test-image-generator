@@ -11,16 +11,21 @@ def generate_images():
 		label = f'{ftype} {format}'
 		print(f'{label}...')
 		if ext is None: ext = ftype.lower()
-		fn = f'output/test_{ftype.lower()}_{format.lower()}.{ext}'
 		arr = gen.generate_test_image(width, height, label)
-		cv2.imwrite(fn, gen.formats[format](arr))
+		cv2.imwrite(f'output/test_ft_{ftype.lower()}_{format.lower()}.{ext}', gen.formats[format](arr))
+		arr = gen.generate_test_image(width, height, None)
+		cv2.imwrite(f'output/test_{ftype.lower()}_{format.lower()}.{ext}', gen.formats[format](arr))
 
 	def gen_raw(format, conv, dtype=None):
 		print(f"RAW {format}...")
 		numpy.ascontiguousarray(
 			conv(gen.generate_test_image(width, height, f'RAW {format}')),
 			dtype=dtype,
-		).tofile(f'output/test_raw_{width}x{height}_{format}.raw')
+		).tofile(f'output/test_ft_raw_{width}x{height}_{format}.raw')
+		numpy.ascontiguousarray(
+			conv(gen.generate_test_image(width, height, None)),
+			dtype=dtype,
+		).tofile(f'output/test_{width}x{height}_{format}.raw')
 
 	gen_img('RGBA16', 'PNG')
 	gen_img('RGB16',  'PNG')

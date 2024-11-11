@@ -59,10 +59,15 @@ def generate_text(area, flip, format, ctx):
 
 	assert label_size[1] < area[3]
 
-	remaining = (area[2], area[3] - label_size[1] - padding)
-	format_surface, format_size = fit_text(remaining[0], remaining[1], format)
-	format_x = (area[2] - format_size[0]) // 2
-	format_y = label_size[1] + padding
+	if format is None:
+		format_x = 0
+		format_y = 0
+		format_size = (0, 0)
+	else:
+		remaining = (area[2], area[3] - label_size[1] - padding)
+		format_surface, format_size = fit_text(remaining[0], remaining[1], format)
+		format_x = (area[2] - format_size[0]) // 2
+		format_y = label_size[1] + padding
 
 	vert_off = (area[3] - (label_size[1] + padding + format_size[1])) // 2
 	label_y += vert_off
@@ -86,7 +91,9 @@ def generate_text(area, flip, format, ctx):
 		g.add_color_stop_rgba(0.0, 0.667, 0.667, 0.667, 1.0)
 		g.add_color_stop_rgba(1.0, 0.333, 0.333, 0.333, 1.0)
 	ctx.set_source(g)
-	ctx.mask_surface(format_surface, area[0] + format_x, area[1] + format_y)
+
+	if format is not None:
+		ctx.mask_surface(format_surface, area[0] + format_x, area[1] + format_y)
 
 	ctx.restore()
 

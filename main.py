@@ -12,9 +12,9 @@ def generate_images():
 		print(f'{label}...')
 		if ext is None: ext = ftype.lower()
 		arr = gen.generate_test_image(width, height, label)
-		cv2.imwrite(f'output/test_{ftype.lower()}_{format.lower()}.{ext}', gen.formats[format](arr))
+		cv2.imwrite(f'output/test_{ftype.lower()}_{format.lower()}.{ext}', gen.formats[format](gen.bgra(arr)))
 		arr = gen.generate_test_image(width, height, None)
-		cv2.imwrite(f'output/test_nl_{format.lower()}.{ext}', gen.formats[format](arr))
+		cv2.imwrite(f'output/test_nl_{format.lower()}.{ext}', gen.formats[format](gen.bgra(arr)))
 
 	def gen_raw(format, conv, dtype=None):
 		print(f"RAW {format}...")

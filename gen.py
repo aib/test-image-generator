@@ -5,12 +5,13 @@ import cairo
 import cv2
 import numpy
 
-u8 =  lambda arr: numpy.rint(arr * 255).astype(numpy.uint8)
-u16 = lambda arr: numpy.rint(arr * 65535).astype(numpy.uint16)
-rgb = lambda arr: arr[:, :, 0:3]
-a =   lambda arr: arr[:, :, -1]
-g =   lambda arr: numpy.average(rgb(arr), axis=2)
-ga =  lambda arr: numpy.concatenate((g(arr).reshape(arr.shape[0], arr.shape[1], 1), a(arr).reshape(arr.shape[0], arr.shape[1], 1)), axis=2)
+u8 =   lambda arr: numpy.rint(arr * 255).astype(numpy.uint8)
+u16 =  lambda arr: numpy.rint(arr * 65535).astype(numpy.uint16)
+rgb =  lambda arr: arr[:, :, 0:3]
+bgra = lambda arr: arr[:, :, [2, 1, 0, 3]]
+a =    lambda arr: arr[:, :, -1]
+g =    lambda arr: numpy.average(rgb(arr), axis=2)
+ga =   lambda arr: numpy.concatenate((g(arr).reshape(arr.shape[0], arr.shape[1], 1), a(arr).reshape(arr.shape[0], arr.shape[1], 1)), axis=2)
 
 formats = {
 	'RGBA16': lambda arr: u16(arr),
@@ -46,7 +47,7 @@ def generate_test_image(width, height, format):
 		npbuf = numpy.frombuffer(bio.getbuffer(), numpy.uint8)
 		arr = cv2.imdecode(npbuf, cv2.IMREAD_UNCHANGED)
 
-		return numpy.array(arr.astype(numpy.float64) / 65535.0)
+		return bgra(arr.astype(numpy.float64) / 65535.0)
 
 def generate_text(area, flip, format, ctx):
 	padding = 32
